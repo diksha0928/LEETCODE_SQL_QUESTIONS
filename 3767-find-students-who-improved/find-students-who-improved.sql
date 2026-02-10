@@ -1,29 +1,27 @@
 -- Write your PostgreSQL query statement below
-with highest_scores as(
+select
+      s.student_id,
+      s.subject,
+      min(case when s.exam_date = sc.first_date then s.score end) as first_score,
+      min(case when s.exam_date = sc.last_date then s.score end) as latest_score
+from Scores s
+join (
     select student_id,
-    subject,
-    score,
-    exam_date,
-    first_value(score) over (
-        partition by student_id, subject
-        order by exam_date
-    ) as first_score,
-    last_value(score) over (
-        partition by student_id, subject
-        rows between unbounded preceding and unbounded following
-    ) as latest_score,
-    count(*) over (
-        partition by student_id, subject
-    ) as exam_count
-from Scores
-)
-
-select student_id,
-       subject,
-       first_score,
-       latest_score
-from highest_scores
-where exam_count >= 2
-and latest_score > first_score
-group by student_id, subject,first_score, latest_score
-order by student_id, subject asc;
+           subject,
+           min(exam_date) as first_date,
+           max(exam_date) as last_date
+    from Scores
+    group by student_id, subject
+    having count(*) >= 2
+)sc
+on s.student_id = sc.student_id
+and s.subject = sc.subject
+group by s.student_id, 
+         s.subject, 
+         sc.first_date, 
+         sc.last_date
+having 
+       min(case when s.exam_date = sc.last_date then s.score end) 
+       >
+       min(case when s.exam_date = sc.first_date then s.score end)
+order by s.student_id, s.subject asc;
