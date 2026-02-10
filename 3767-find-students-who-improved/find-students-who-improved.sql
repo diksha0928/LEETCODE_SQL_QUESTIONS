@@ -11,7 +11,6 @@ with highest_scores as(
     last_value(score) over (
         partition by student_id, subject
         rows between unbounded preceding and unbounded following
-        -- order by exam_date
     ) as latest_score,
     count(*) over (
         partition by student_id, subject
