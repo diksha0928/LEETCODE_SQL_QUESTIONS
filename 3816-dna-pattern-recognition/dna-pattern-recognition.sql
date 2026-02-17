@@ -18,7 +18,7 @@ select sample_id,
         end
         as has_atat,
        case
-        when dna_sequence like '%GGG%' then 1
+        when dna_sequence ~ 'G{3,}' then 1
         else 0
         end
         as has_ggg
