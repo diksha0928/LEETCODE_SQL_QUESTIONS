@@ -19,7 +19,6 @@ class Solution(object):
             
             current = current.next
 
-        # attach remaining nodes
         if list1:
             current.next = list1
         else:
